@@ -20,12 +20,13 @@ class Minesweeper extends World {
 
   Minesweeper() {
     this.mines = this.setMines();
-    this.randObj = new Random(1); //this isn't being used.
+    this.randObj = new Random(1); // this isn't being used.
   }
 
+  // Visualizes the world
   public WorldScene makeScene() {
     WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
-    scene.placeImageXY(this.drawMultRows(makeMultRows(makeColumn())),
+    scene.placeImageXY(this.drawMultRows(this.makeMultRows(this.makeColumn())),
         (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
         (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
     return scene;
@@ -36,18 +37,19 @@ class Minesweeper extends World {
   public ArrayList<Cell> makeColumn() {
     // Creates an ArrayList with the number of elements
     // (columns) we want it to have.
-    ArrayList<Cell> row = new ArrayList<Cell>(Minesweeper.GAME_COLUMN_LEN);
-    for (int i = 0; i < Minesweeper.GAME_COLUMN_LEN; i++) {
-      row.add(new Cell());
+    ArrayList<Cell> column = new ArrayList<Cell>(Minesweeper.GAME_COLUMN_LEN);
+    while (column.size() < Minesweeper.GAME_COLUMN_LEN) {
+      column.add(new Cell());
     }
-    return row;
+    return column;
   }
 
   // Given one ArrayList representing the left most column,
   // creates an ArrayList for each element.
-  public ArrayList<ArrayList<Cell>> makeMultRows(ArrayList<Cell> leftMostCol) { // This might be
-                                                                                // overkill. How to
-                                                                                // improve?
+
+  /* THIS METHOD IS VERY LARGE. HOW TO TRIM? */
+
+  public ArrayList<ArrayList<Cell>> makeMultRows(ArrayList<Cell> leftMostCol) {
     int rowLength = Minesweeper.GAME_ROW_LEN - 1;
     int colLength = Minesweeper.GAME_COLUMN_LEN - 1;
 
@@ -71,95 +73,70 @@ class Minesweeper extends World {
         }
         else if (y == 0 && x == rowLength) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          neighbhors.add(starter.get(0).get(rowLength - 1)); // y value first, then x value
-          neighbhors.add(starter.get(1).get(rowLength)); // starter.get(y-value).get(x-value)
+          neighbhors.add(starter.get(0).get(rowLength - 1));
+          neighbhors.add(starter.get(1).get(rowLength));
           neighbhors.add(starter.get(1).get(rowLength - 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (y == colLength && x == 0) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          neighbhors.add(starter.get(colLength - 1).get(0)); // y value first, then x value
-          neighbhors.add(starter.get(colLength - 1).get(1)); // starter.get(y-value).get(x-value)
+          neighbhors.add(starter.get(colLength - 1).get(0));
+          neighbhors.add(starter.get(colLength - 1).get(1));
           neighbhors.add(starter.get(colLength).get(1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (y == colLength && x == rowLength) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          neighbhors.add(starter.get(colLength - 1).get(rowLength)); // y value first, then x value
-          neighbhors.add(starter.get(colLength - 1).get(rowLength - 1)); // starter.get(y-value).get(x-value)
+          neighbhors.add(starter.get(colLength - 1).get(rowLength));
+          neighbhors.add(starter.get(colLength - 1).get(rowLength - 1));
           neighbhors.add(starter.get(colLength).get(rowLength - 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (y == 0) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          // neighbhors.add(starter.get(...).get(...)); // y value first, then x value
-
           neighbhors.add(starter.get(y).get(x - 1));
           neighbhors.add(starter.get(y).get(x + 1));
           neighbhors.add(starter.get(y + 1).get(x - 1));
           neighbhors.add(starter.get(y + 1).get(x));
           neighbhors.add(starter.get(y + 1).get(x + 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (y == colLength) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          // neighbhors.add(starter.get(...).get(...)); // y value first, then x value
-
           neighbhors.add(starter.get(y).get(x - 1));
           neighbhors.add(starter.get(y).get(x + 1));
           neighbhors.add(starter.get(y - 1).get(x - 1));
           neighbhors.add(starter.get(y - 1).get(x));
           neighbhors.add(starter.get(y - 1).get(x + 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (x == 0) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          // neighbhors.add(starter.get(...).get(...)); // y value first, then x value
-
           neighbhors.add(starter.get(y - 1).get(x));
           neighbhors.add(starter.get(y + 1).get(x));
           neighbhors.add(starter.get(y - 1).get(x + 1));
           neighbhors.add(starter.get(y).get(x + 1));
           neighbhors.add(starter.get(y + 1).get(x + 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else if (x == rowLength) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          // neighbhors.add(starter.get(...).get(...)); // y value first, then x value
-
           neighbhors.add(starter.get(y - 1).get(x));
           neighbhors.add(starter.get(y + 1).get(x));
           neighbhors.add(starter.get(y - 1).get(x - 1));
           neighbhors.add(starter.get(y).get(x - 1));
           neighbhors.add(starter.get(y + 1).get(x - 1));
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
         else { // Everything else that is not on the edges
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
-          // find its neighbhors:
-          // neighbhors.add(starter.get(...).get(...)); // y value first, then x value
-
           neighbhors.add(starter.get(y - 1).get(x - 1)); // up, left
           neighbhors.add(starter.get(y - 1).get(x)); // up
           neighbhors.add(starter.get(y - 1).get(x + 1)); // up, right
@@ -169,7 +146,6 @@ class Minesweeper extends World {
           neighbhors.add(starter.get(y + 1).get(x - 1)); // down, left
           neighbhors.add(starter.get(y).get(x - 1)); // left
 
-          // Add all the neighbhors here:
           starter.get(y).get(x).neighbors.addAll(neighbhors);
         }
       }
@@ -194,7 +170,7 @@ class Minesweeper extends World {
     return row;
   }
 
-  // Draws multiple rows
+  // Draws multiple rows (given 2D array)
   public WorldImage drawMultRows(ArrayList<ArrayList<Cell>> ar) {
     WorldImage rows = new EmptyImage();
     for (ArrayList<Cell> oneRow : ar) {
@@ -212,19 +188,19 @@ class Minesweeper extends World {
     return answer;
   }
 
-  // Creating ArrayList<Posn> representing coordinates of mines
+  // Creates an ArrayList<Posn>, representing coordinates of mines
   ArrayList<Posn> setMines() {
     ArrayList<Posn> answer = new ArrayList<Posn>();
     while (answer.size() < Minesweeper.MINES) {
-      int x = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN); 
-      // THIS USES A NEW RANDOM() INSTEAD OF FIELD IN CONSTRUCTOR
+      int x = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN);
+      /* THIS USES A NEW RANDOM() INSTEAD OF FIELD IN CONSTRUCTOR */
       int y = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN);
-      Posn position = new Posn(x, y);
+      Posn newPosn = new Posn(x, y);
       // If the list of coordinates doesn't have the coordinate, add it to the list.
       // Else, keep going until
       // the size is the number of positions we want.
-      if (!answer.contains(position)) {
-        answer.add(position);
+      if (!answer.contains(newPosn)) {
+        answer.add(newPosn);
       }
     }
     return answer;
@@ -234,7 +210,7 @@ class Minesweeper extends World {
 // Represents a single cell
 class Cell {
   public static final int CELL_LEN = 35;
-  // static OutlineMode FILL = OutlineMode.SOLID; not working
+  static OutlineMode FILL = OutlineMode.SOLID; // not working
   static Color CCOLOR = Color.GRAY;
 
   ArrayList<Cell> neighbors;
@@ -245,6 +221,7 @@ class Cell {
     this.hasMine = false;
   }
 
+  // Produces the number of mines surrounding THIS Cell.
   int countMines() {
     int counter = 0;
     for (Cell cell : this.neighbors) {
@@ -261,13 +238,13 @@ class Cell {
           // Displays size of neighbhors on each cell
           new OverlayImage(
               new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
-              new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.SOLID, Color.GREEN)));
+              new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Color.GREEN)));
     }
     else {
       return new OverlayImage(new TextImage(((Integer) this.countMines()).toString(), Color.BLACK),
           new OverlayImage(
               new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
-              new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.SOLID, Cell.CCOLOR)));
+              new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR)));
     }
   }
 }
