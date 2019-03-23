@@ -5,13 +5,18 @@ import javalib.impworld.*;
 import java.awt.Color;
 import javalib.worldimages.*;
 
+
+// TODO:
+// 1. Should we abstract each cell's neighbhors? (several if statements)
+// 2. Can we put both functions of makeMultRows in 1 for loop?
+// 3. Should makeColumn() be in utils? 
+
 // The main game class
 
 class Minesweeper extends World {
   public static final int GAME_COLUMN_LEN = 5;
   public static final int GAME_ROW_LEN = 5;
   public static final int MINES = 10;
-  // cannot be more than GAME_COLUMN_LEN*GAME_ROW_LEN -- how can we limit that?
   static final int WIDTH = 500;
   static final int HEIGHT = 500;
 
@@ -56,11 +61,14 @@ class Minesweeper extends World {
     ArrayList<ArrayList<Cell>> starter = new ArrayList<ArrayList<Cell>>();
     // Adds a row (ArrayList<Cell>)to each element in the column leftMostCol
     for (Cell cell : leftMostCol) {
-      starter.add(makeRow());
+      starter.add(this.makeRow());
     }
 
     for (int y = 0; y < starter.size(); y++) {
       for (int x = 0; x < starter.get(y).size(); x++) {
+        if (this.mines.contains(new Posn(x + 1, y + 1))) { // does this work? If true, does it break out of this?
+          starter.get(y).get(x).hasMine = true;
+        }
         if (y == 0 && x == 0) {
           ArrayList<Cell> neighbhors = new ArrayList<Cell>();
           // find its neighbhors:
@@ -150,14 +158,13 @@ class Minesweeper extends World {
         }
       }
     }
-
-    for (int y = 0; y < starter.size(); y++) {
-      for (int x = 0; x < starter.get(y).size(); x++) {
-        if (this.mines.contains(new Posn(x + 1, y + 1))) {
-          starter.get(y).get(x).hasMine = true;
-        }
-      }
-    }
+//    for (int y = 0; y < starter.size(); y++) {
+//      for (int x = 0; x < starter.get(y).size(); x++) {
+//        if (this.mines.contains(new Posn(x + 1, y + 1))) {
+//          starter.get(y).get(x).hasMine = true;
+//        }
+//      }
+//    }
     return starter;
   }
 
@@ -173,6 +180,7 @@ class Minesweeper extends World {
   // Draws multiple rows (given 2D array)
   public WorldImage drawMultRows(ArrayList<ArrayList<Cell>> ar) {
     WorldImage rows = new EmptyImage();
+    
     for (ArrayList<Cell> oneRow : ar) {
       rows = new AboveImage(rows, drawRow(oneRow));
     }
@@ -194,7 +202,7 @@ class Minesweeper extends World {
     while (answer.size() < Minesweeper.MINES) {
       int x = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN);
       /* THIS USES A NEW RANDOM() INSTEAD OF FIELD IN CONSTRUCTOR */
-      int y = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN);
+      int y = 1 + new Random().nextInt(Minesweeper.GAME_COLUMN_LEN);
       Posn newPosn = new Posn(x, y);
       // If the list of coordinates doesn't have the coordinate, add it to the list.
       // Else, keep going until
