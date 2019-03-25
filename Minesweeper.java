@@ -239,6 +239,7 @@ class Cell {
   }
 }
 
+// Testing the program
 class MinesweeperExamples {
   Minesweeper test;
   Cell aMine;
@@ -251,6 +252,7 @@ class MinesweeperExamples {
   Random randTest;
   ArrayList<Cell> initCol;
 
+  // Initializing data
   void initData() {
     this.test = new Minesweeper();
     this.aMine = new Cell();
@@ -272,11 +274,13 @@ class MinesweeperExamples {
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
   }
 
+  // Testing the main program (booting up the program)
   void testMain(Tester t) {
     initData();
     test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, 1);
   }
 
+  // testing drawing one cell
   void testDrawCell(Tester t) {
     initData();
     t.checkExpect(this.aMine.drawCell(),
@@ -292,6 +296,7 @@ class MinesweeperExamples {
                 new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR))));
   }
 
+  // Testing countMines(), which counts the number of mines around one cell.
   void testCountMines(Tester t) {
     initData();
     t.checkExpect(this.aMine.countMines(), 0);
@@ -299,6 +304,7 @@ class MinesweeperExamples {
     t.checkExpect(this.aCell1.countMines(), 1);
   }
 
+  // Testing the method that sets mines on the grid
   void testSetMines(Tester t) {
     initData();
 
@@ -311,6 +317,7 @@ class MinesweeperExamples {
     // Tutor told us that we cannot test because of the randomness
   }
 
+  // Testing drawing one row
   void testDrawRow(Tester t) {
     initData();
 
@@ -324,6 +331,7 @@ class MinesweeperExamples {
     t.checkExpect(this.test.drawRow(new ArrayList<Cell>()), new EmptyImage());
   }
 
+  // Testing drawing multiple rows.
   void testDrawMultRows(Tester t) {
     initData();
 
@@ -335,12 +343,14 @@ class MinesweeperExamples {
         new ArrayList<ArrayList<Cell>>(Arrays.asList(exCells, new ArrayList<Cell>()))), rows);
   }
 
+  // Testing the creation of one row
   void testMakeRow(Tester t) {
     initData();
 
     t.checkExpect(this.test.makeRow(), this.initRow);
   }
 
+  // Testing creating multiple rows, including setting neighbhors to each cell
   void testMakeMultRows(Tester t) {
     initData();
 
@@ -360,12 +370,14 @@ class MinesweeperExamples {
     t.checkExpect(testResult.get(2).get(2).neighbors.size(), 8); // Middle
   }
 
+  // Testing the creation of one column
   void testMakeColumn(Tester t) {
     initData();
 
     t.checkExpect(this.test.makeColumn(), this.initCol);
   }
 
+  // Testing the creation of the scene.
   void testMakeScene(Tester t) {
     initData();
 
