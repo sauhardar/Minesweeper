@@ -315,26 +315,14 @@ class MinesweeperExamples {
     initData();
 
     ArrayList<Posn> answer = new ArrayList<Posn>();
-//    while (answer.size() < 10) {
-//      int x = 1 + this.randTest.nextInt(5);
-//      int y = 1 + this.randTest.nextInt(5);
-//      Posn newPosn = new Posn(x, y);
-//      if (!answer.contains(newPosn)) {
-//        answer.add(newPosn);
-//      }
-//    }
-
-    Posn p1 = new Posn(2, 5);
-    Posn p2 = new Posn(5, 5);
-    Posn p3 = new Posn(4, 2);
-    Posn p4 = new Posn(1, 1);
-    Posn p5 = new Posn(1, 2);
-    Posn p6 = new Posn(5, 2);
-    Posn p7 = new Posn(2, 2);
-    Posn p8 = new Posn(4, 4);
-    Posn p9 = new Posn(2, 3);
-    Posn p10 = new Posn(4, 1);
-    answer = new ArrayList<Posn>(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10));
+    while (answer.size() < 10) {
+      int x = 1 + this.randTest.nextInt(5);
+      int y = 1 + this.randTest.nextInt(5);
+      Posn newPosn = new Posn(x, y);
+      if (!answer.contains(newPosn)) {
+        answer.add(newPosn);
+      }
+    }
 
     t.checkExpect(this.test.mines, answer);
   }
