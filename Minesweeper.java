@@ -56,8 +56,7 @@ class Minesweeper extends World {
 
     for (int y = 0; y < starter.size(); y++) {
       for (int x = 0; x < starter.get(y).size(); x++) {
-        if (this.mines.contains(new Posn(x + 1, y + 1))) { // does this work? If true, does it break
-                                                           // out of this?
+        if (this.mines.contains(new Posn(x + 1, y + 1))) {
           starter.get(y).get(x).hasMine = true;
         }
         if (y == 0 && x == 0) {
@@ -149,13 +148,6 @@ class Minesweeper extends World {
         }
       }
     }
-//    for (int y = 0; y < starter.size(); y++) {
-//      for (int x = 0; x < starter.get(y).size(); x++) {
-//        if (this.mines.contains(new Posn(x + 1, y + 1))) {
-//          starter.get(y).get(x).hasMine = true;
-//        }
-//      }
-//    }
     return starter;
   }
 
@@ -275,19 +267,15 @@ class MinesweeperExamples {
     this.initRow = new ArrayList<Cell>(
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
     this.randTest = new Random(1);
+
     this.initCol = new ArrayList<Cell>(
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
   }
 
-//  void testMain(Tester t) {
-//    initData();
-//    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, 1);
-//    for (Posn p : test.mines) {
-//      System.out
-//          .println("(" + ((Integer) p.x).toString() + ", " + ((Integer) p.y).toString() + ")");
-//      // This is just to show the mine locations.
-//    }
-//  }
+  void testMain(Tester t) {
+    initData();
+    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, 1);
+  }
 
   void testDrawCell(Tester t) {
     initData();
@@ -314,17 +302,13 @@ class MinesweeperExamples {
   void testSetMines(Tester t) {
     initData();
 
-    ArrayList<Posn> answer = new ArrayList<Posn>();
-    while (answer.size() < 10) {
-      int x = 1 + this.randTest.nextInt(5);
-      int y = 1 + this.randTest.nextInt(5);
-      Posn newPosn = new Posn(x, y);
-      if (!answer.contains(newPosn)) {
-        answer.add(newPosn);
-      }
-    }
+    this.test.setMines();
+    ArrayList<Posn> testResult = this.test.mines;
+    int numMines = this.test.mines.size();
 
-    t.checkExpect(this.test.mines, answer);
+    t.checkExpect(this.test.mines, testResult);
+    t.checkExpect(numMines, 10);
+    // Tutor told us that we cannot test because of the randomness
   }
 
   void testDrawRow(Tester t) {
@@ -353,21 +337,38 @@ class MinesweeperExamples {
 
   void testMakeRow(Tester t) {
     initData();
+
     t.checkExpect(this.test.makeRow(), this.initRow);
   }
 
-//  void testMakeMultRows(Tester t) {
-//    initData();
-//    t.checkExpect(this.test.makeMultRows(initCol), new EmptyImage());
-//  }
+  void testMakeMultRows(Tester t) {
+    initData();
+
+    ArrayList<ArrayList<Cell>> testResult = this.test.makeMultRows(this.initCol);
+
+    t.checkExpect(this.test.makeMultRows(initCol), testResult);
+    // Tutor told us we cannot test sufficiently due to randomness
+    t.checkExpect(testResult.size() * testResult.get(0).size(), 25);
+    t.checkExpect(testResult.get(0).get(0).neighbors.size(), 3); // Top left
+    t.checkExpect(testResult.get(0).get(4).neighbors.size(), 3); // Top right
+    t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
+    t.checkExpect(testResult.get(4).get(0).neighbors.size(), 3); // Bottom left
+    t.checkExpect(testResult.get(4).get(4).neighbors.size(), 3); // Bottom right
+    t.checkExpect(testResult.get(4).get(2).neighbors.size(), 5); // Bottom middle
+    t.checkExpect(testResult.get(2).get(0).neighbors.size(), 5); // Middle left
+    t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
+    t.checkExpect(testResult.get(2).get(2).neighbors.size(), 8); // Middle
+  }
 
   void testMakeColumn(Tester t) {
     initData();
+
     t.checkExpect(this.test.makeColumn(), this.initCol);
   }
 
   void testMakeScene(Tester t) {
     initData();
+
     WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
     scene.placeImageXY(this.test.drawMultRows(this.test.makeMultRows(this.test.makeColumn())), 87,
         87);
