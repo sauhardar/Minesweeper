@@ -1,31 +1,24 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import tester.*;
 import javalib.impworld.*;
 import java.awt.Color;
 import javalib.worldimages.*;
 
-
-// TODO:
-// 1. Should we abstract each cell's neighbhors? (several if statements)
-// 2. Can we put both functions of makeMultRows in 1 for loop?
-// 3. Should makeColumn() be in utils? 
-
 // The main game class
-
 class Minesweeper extends World {
-  public static final int GAME_COLUMN_LEN = 5;
-  public static final int GAME_ROW_LEN = 5;
-  public static final int MINES = 10;
-  static final int WIDTH = 500;
-  static final int HEIGHT = 500;
+  private static final int GAME_COLUMN_LEN = 5;
+  private static final int GAME_ROW_LEN = 5;
+  private static final int MINES = 10;
+  public static final int WIDTH = 1200;
+  public static final int HEIGHT = 800;
+  private static final Random RANDOBJ = new Random(1);
 
   ArrayList<Posn> mines;
-  Random randObj;
 
   Minesweeper() {
     this.mines = this.setMines();
-    this.randObj = new Random(1); // this isn't being used.
   }
 
   // Visualizes the world
@@ -51,9 +44,6 @@ class Minesweeper extends World {
 
   // Given one ArrayList representing the left most column,
   // creates an ArrayList for each element.
-
-  /* THIS METHOD IS VERY LARGE. HOW TO TRIM? */
-
   public ArrayList<ArrayList<Cell>> makeMultRows(ArrayList<Cell> leftMostCol) {
     int rowLength = Minesweeper.GAME_ROW_LEN - 1;
     int colLength = Minesweeper.GAME_COLUMN_LEN - 1;
@@ -66,7 +56,8 @@ class Minesweeper extends World {
 
     for (int y = 0; y < starter.size(); y++) {
       for (int x = 0; x < starter.get(y).size(); x++) {
-        if (this.mines.contains(new Posn(x + 1, y + 1))) { // does this work? If true, does it break out of this?
+        if (this.mines.contains(new Posn(x + 1, y + 1))) { // does this work? If true, does it break
+                                                           // out of this?
           starter.get(y).get(x).hasMine = true;
         }
         if (y == 0 && x == 0) {
@@ -180,7 +171,7 @@ class Minesweeper extends World {
   // Draws multiple rows (given 2D array)
   public WorldImage drawMultRows(ArrayList<ArrayList<Cell>> ar) {
     WorldImage rows = new EmptyImage();
-    
+
     for (ArrayList<Cell> oneRow : ar) {
       rows = new AboveImage(rows, drawRow(oneRow));
     }
@@ -200,9 +191,8 @@ class Minesweeper extends World {
   ArrayList<Posn> setMines() {
     ArrayList<Posn> answer = new ArrayList<Posn>();
     while (answer.size() < Minesweeper.MINES) {
-      int x = 1 + new Random().nextInt(Minesweeper.GAME_ROW_LEN);
-      /* THIS USES A NEW RANDOM() INSTEAD OF FIELD IN CONSTRUCTOR */
-      int y = 1 + new Random().nextInt(Minesweeper.GAME_COLUMN_LEN);
+      int x = 1 + RANDOBJ.nextInt(Minesweeper.GAME_ROW_LEN);
+      int y = 1 + RANDOBJ.nextInt(Minesweeper.GAME_COLUMN_LEN);
       Posn newPosn = new Posn(x, y);
       // If the list of coordinates doesn't have the coordinate, add it to the list.
       // Else, keep going until
@@ -258,14 +248,130 @@ class Cell {
 }
 
 class MinesweeperExamples {
+  Minesweeper test;
+  Cell aMine;
+  Cell aCell1;
+  Cell aCell2;
+  Cell aCell3;
+  Cell initCell;
+  ArrayList<Cell> exCells;
+  ArrayList<Cell> initRow;
+  Random randTest;
+  ArrayList<Cell> initCol;
 
-  void testMain(Tester t) {
-    Minesweeper test = new Minesweeper();
-    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, 1);
-    for (Posn p : test.mines) {
-      System.out
-          .println("(" + ((Integer) p.x).toString() + ", " + ((Integer) p.y).toString() + ")");
-      // This is just to show the mine locations.
+  void initData() {
+    this.test = new Minesweeper();
+    this.aMine = new Cell();
+    this.aMine.hasMine = true;
+    this.aCell1 = new Cell();
+    this.aCell2 = new Cell();
+    this.aCell3 = new Cell();
+    this.initCell = new Cell();
+    this.aCell1.neighbors.add(aMine);
+    this.aCell1.neighbors.add(aCell2);
+    this.aCell1.neighbors.add(aCell3);
+    this.exCells = new ArrayList<Cell>(
+        Arrays.asList(this.aMine, this.aCell1, this.aCell2, this.aCell3));
+    this.initRow = new ArrayList<Cell>(
+        Arrays.asList(initCell, initCell, initCell, initCell, initCell));
+    this.randTest = new Random(1);
+    this.initCol = new ArrayList<Cell>(
+        Arrays.asList(initCell, initCell, initCell, initCell, initCell));
+  }
+
+//  void testMain(Tester t) {
+//    initData();
+//    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, 1);
+//    for (Posn p : test.mines) {
+//      System.out
+//          .println("(" + ((Integer) p.x).toString() + ", " + ((Integer) p.y).toString() + ")");
+//      // This is just to show the mine locations.
+//    }
+//  }
+
+  void testDrawCell(Tester t) {
+    initData();
+    t.checkExpect(this.aMine.drawCell(),
+        new OverlayImage(new TextImage("*", Color.black),
+            new OverlayImage(
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Color.GREEN))));
+    t.checkExpect(this.aCell1.drawCell(),
+        new OverlayImage(
+            new TextImage(((Integer) this.aCell1.countMines()).toString(), Color.BLACK),
+            new OverlayImage(
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR))));
+  }
+
+  void testCountMines(Tester t) {
+    initData();
+    t.checkExpect(this.aMine.countMines(), 0);
+    t.checkExpect(this.aCell2.countMines(), 0);
+    t.checkExpect(this.aCell1.countMines(), 1);
+  }
+
+  void testSetMines(Tester t) {
+    initData();
+
+    ArrayList<Posn> answer = new ArrayList<Posn>();
+    while (answer.size() < 10) {
+      int x = 1 + this.randTest.nextInt(5);
+      int y = 1 + this.randTest.nextInt(5);
+      Posn newPosn = new Posn(x, y);
+      if (!answer.contains(newPosn)) {
+        answer.add(newPosn);
+      }
     }
+
+    t.checkExpect(this.test.mines, answer);
+  }
+
+  void testDrawRow(Tester t) {
+    initData();
+
+    WorldImage result = new EmptyImage();
+    result = new BesideImage(result, aMine.drawCell());
+    result = new BesideImage(result, aCell1.drawCell());
+    result = new BesideImage(result, aCell2.drawCell());
+    result = new BesideImage(result, aCell3.drawCell());
+
+    t.checkExpect(this.test.drawRow(this.exCells), result);
+    t.checkExpect(this.test.drawRow(new ArrayList<Cell>()), new EmptyImage());
+  }
+
+  void testDrawMultRows(Tester t) {
+    initData();
+
+    WorldImage rows = new EmptyImage();
+    rows = new AboveImage(rows, this.test.drawRow(this.exCells));
+    rows = new AboveImage(rows, new EmptyImage());
+
+    t.checkExpect(this.test.drawMultRows(
+        new ArrayList<ArrayList<Cell>>(Arrays.asList(exCells, new ArrayList<Cell>()))), rows);
+  }
+
+  void testMakeRow(Tester t) {
+    initData();
+    t.checkExpect(this.test.makeRow(), this.initRow);
+  }
+
+//  void testMakeMultRows(Tester t) {
+//    initData();
+//    t.checkExpect(this.test.makeMultRows(initCol), new EmptyImage());
+//  }
+
+  void testMakeColumn(Tester t) {
+    initData();
+    t.checkExpect(this.test.makeColumn(), this.initCol);
+  }
+
+  void testMakeScene(Tester t) {
+    initData();
+    WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
+    scene.placeImageXY(this.test.drawMultRows(this.test.makeMultRows(this.test.makeColumn())), 87,
+        87);
+
+    t.checkExpect(this.test.makeScene(), scene);
   }
 }
