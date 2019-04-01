@@ -363,7 +363,7 @@ class Cell {
   }
 }
 
-// Testing the program. Program is tested 
+// Testing the program. Program is tested
 // with a 5x5 with 10 mines game
 class MinesweeperExamples {
   Minesweeper test;
@@ -400,7 +400,7 @@ class MinesweeperExamples {
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
   }
 
-  // Testing the main program (booting up the program)
+  // Testing the main program
 //  void testMain(Tester t) {
 //    initData();
 //    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, .003);
@@ -530,7 +530,7 @@ class MinesweeperExamples {
     t.checkExpect(this.test.board.get(0).get(0).isClicked, false);
     this.test.onMouseClicked(new Posn(5, 5), "LeftButton"); // Top left most cell
     t.checkExpect(this.test.board.get(0).get(0).isClicked, true);
-    
+
     t.checkExpect(this.test.board.get(1).get(0).isFlagged, false);
     this.test.onMouseClicked(new Posn(5, 40), "RightButton"); // One cell down.
     t.checkExpect(this.test.board.get(1).get(0).isFlagged, true);
@@ -585,9 +585,9 @@ class MinesweeperExamples {
         this.test.drawMultRows(this.test.board));
     testScene.placeImageXY(testFinalImage, (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
         (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
-    
+
     t.checkExpect(this.test.makeFinalScene("You Lose!"), testScene);
-    
+
     initData();
     this.test.revealMines();
 
