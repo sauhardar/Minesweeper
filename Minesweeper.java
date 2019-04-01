@@ -8,9 +8,9 @@ import javalib.worldimages.*;
 
 // The main game class
 class Minesweeper extends World {
-  private static final int GAME_COLUMN_LEN = 5;
-  private static final int GAME_ROW_LEN = 5;
-  private static final int MINES = 10;
+  public static final int GAME_COLUMN_LEN = 5;
+  public static final int GAME_ROW_LEN = 5;
+  public static final int MINES = 10;
   public static final int WIDTH = Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN;
   public static final int HEIGHT = Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN;
   private static final Random RANDOBJ = new Random(1);
@@ -271,7 +271,8 @@ class Minesweeper extends World {
     WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
     this.revealMines();
     WorldImage finalImage = new OverlayImage(
-        new TextImage(msg, Minesweeper.GAME_ROW_LEN * 2.2, Color.PINK), this.drawMultRows(board));
+        new TextImage(msg, Minesweeper.GAME_ROW_LEN * 2.2, Color.PINK),
+        this.drawMultRows(this.board));
     // Place the final image on the current game screen.
     scene.placeImageXY(finalImage, (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
         (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
@@ -400,10 +401,10 @@ class MinesweeperExamples {
   }
 
   // Testing the main program (booting up the program)
-  void testMain(Tester t) {
-    initData();
-    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, .003);
-  }
+//  void testMain(Tester t) {
+//    initData();
+//    test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, .003);
+//  }
 
   // testing drawing one cell
   void testDrawCell(Tester t) {
@@ -522,13 +523,17 @@ class MinesweeperExamples {
   // Testing onMouseClicked()
   void testOnMouseClick(Tester t) {
     initData();
+    this.test.board.get(0).get(0).isClicked = false;
+    this.test.board.get(0).get(0).isFlagged = false;
+    this.test.board.get(1).get(0).isClicked = false;
+    this.test.board.get(1).get(0).isFlagged = false;
     t.checkExpect(this.test.board.get(0).get(0).isClicked, false);
-    this.test.onMouseClicked(new Posn(0, 0), "LeftButton");
+    this.test.onMouseClicked(new Posn(5, 5), "LeftButton"); // Top left most cell
     t.checkExpect(this.test.board.get(0).get(0).isClicked, true);
+    
     t.checkExpect(this.test.board.get(1).get(0).isFlagged, false);
-    this.test.onMouseClicked(new Posn(5, 36), "RightButton");
+    this.test.onMouseClicked(new Posn(5, 40), "RightButton"); // One cell down.
     t.checkExpect(this.test.board.get(1).get(0).isFlagged, true);
-
   }
 
   // Testing worldEnds()
@@ -571,7 +576,28 @@ class MinesweeperExamples {
 
   // Testing makeFinalScene()
   void testMakeFinalScene(Tester t) {
-    // Not sure how to test here.
+    initData();
+    this.test.revealMines();
+
+    WorldScene testScene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
+    WorldImage testFinalImage = new OverlayImage(
+        new TextImage("You Lose!", Minesweeper.GAME_ROW_LEN * 2.2, Color.PINK),
+        this.test.drawMultRows(this.test.board));
+    testScene.placeImageXY(testFinalImage, (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
+        (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
+    
+    t.checkExpect(this.test.makeFinalScene("You Lose!"), testScene);
+    
+    initData();
+    this.test.revealMines();
+
+    WorldScene testScene1 = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
+    WorldImage testFinalImage1 = new OverlayImage(
+        new TextImage("You Win!", Minesweeper.GAME_ROW_LEN * 2.2, Color.PINK),
+        this.test.drawMultRows(this.test.board));
+    testScene1.placeImageXY(testFinalImage1, (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
+        (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
+    t.checkExpect(this.test.makeFinalScene("You Win!"), testScene1);
   }
 
   // Testing revealMine().
