@@ -8,9 +8,9 @@ import javalib.worldimages.*;
 
 // The main game class
 class Minesweeper extends World {
-  private static final int GAME_COLUMN_LEN = 16;
-  private static final int GAME_ROW_LEN = 30;
-  private static final int MINES = 100;
+  private static final int GAME_COLUMN_LEN = 5;
+  private static final int GAME_ROW_LEN = 5;
+  private static final int MINES = 10;
   public static final int WIDTH = Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN;
   public static final int HEIGHT = Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN;
   private static final Random RANDOBJ = new Random(1);
@@ -197,37 +197,44 @@ class Minesweeper extends World {
     return answer;
   }
 
+  // Handles all right and left button clicking functionality,
+  // which entails flagging, revealing, and flooding cells.
   public void onMouseClicked(Posn mousePos, String button) {
     int posX = mousePos.x / Cell.CELL_LEN;
     int posY = mousePos.y / Cell.CELL_LEN;
     if (posX < Minesweeper.GAME_ROW_LEN || posY < Minesweeper.GAME_COLUMN_LEN) {
-      Cell temp = board.get(posY).get(posX);
+      Cell cell = board.get(posY).get(posX);
       if (button.equals("LeftButton")) {
-        if (temp.hasMine) {
-          temp.isClicked = true;
+        if (cell.isFlagged) {
+          cell.isFlagged = false;
         }
-        else if (temp.countMines() > 0) {
-          temp.isClicked = true;
+        if (cell.hasMine) {
+          cell.isClicked = true;
+        }
+        else if (cell.countMines() > 0) {
+          cell.isClicked = true;
         }
         else {
-          temp.floodCells(new ArrayList<Cell>(Arrays.asList(temp)));
+          cell.floodCells(new ArrayList<Cell>(Arrays.asList(cell)));
         }
       }
       else if (button.equals("RightButton")) {
         if (posX < Minesweeper.GAME_ROW_LEN || posY < Minesweeper.GAME_COLUMN_LEN) {
-          if (!(temp.isClicked)) {
-            temp.isFlagged = !(temp.isFlagged);
+          if (!(cell.isClicked)) {
+            cell.isFlagged = !(cell.isFlagged);
           }
         }
       }
     }
   }
 
+  // Ends the world if a mine has been hit, or if all cells
+  // non-mine cells have been found
   public WorldEnd worldEnds() {
     if (this.hitMine()) {
       return new WorldEnd(true, this.makeFinalScene("Game over: LOSER!"));
     }
-    else if(this.allCellsFound()) {
+    else if (this.allCellsFound()) {
       return new WorldEnd(true, this.makeFinalScene("Congratulations: WINNER!"));
     }
     else {
@@ -235,6 +242,7 @@ class Minesweeper extends World {
     }
   }
 
+  // Determines if a mine has been hit.
   boolean hitMine() {
     for (int r = 0; r < this.board.size(); r++) {
       for (int c = 0; c < this.board.get(r).size(); c++) {
@@ -246,6 +254,7 @@ class Minesweeper extends World {
     return false;
   }
 
+  // Determines if all non-mine cells have been found.
   boolean allCellsFound() {
     for (int r = 0; r < this.board.size(); r++) {
       for (int c = 0; c < this.board.get(r).size(); c++) {
@@ -257,21 +266,20 @@ class Minesweeper extends World {
     return true;
   }
 
+  // Represents the final scene with the appropriate win/lose message.
   public WorldScene makeFinalScene(String msg) {
     WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
-
     this.revealMines();
-
-    WorldImage finalImage = new OverlayImage(new TextImage(msg, 70, Color.PINK),
-        this.drawMultRows(board));
-
+    WorldImage finalImage = new OverlayImage(
+        new TextImage(msg, Minesweeper.GAME_ROW_LEN * 2.2, Color.PINK), this.drawMultRows(board));
+    // Place the final image on the current game screen.
     scene.placeImageXY(finalImage, (Minesweeper.GAME_ROW_LEN * Cell.CELL_LEN / 2),
         (Minesweeper.GAME_COLUMN_LEN * Cell.CELL_LEN / 2));
-
     return scene;
   }
 
-  // Reveals all the mines
+  // Reveals all the mines by changing each mine's isClicked field
+  // to true, which draws each mine as if it has been clicked on.
   void revealMines() {
     for (int r = 0; r < this.board.size(); r++) {
       for (int c = 0; c < this.board.get(r).size(); c++) {
@@ -281,17 +289,12 @@ class Minesweeper extends World {
       }
     }
   }
-
-  public void onTick() {
-    this.makeScene();
-  }
-
 }
 
 // Represents a single cell
 class Cell {
   public static final int CELL_LEN = 35;
-  static OutlineMode FILL = OutlineMode.SOLID; // not working
+  static OutlineMode FILL = OutlineMode.SOLID;
   static Color CCOLOR = Color.GRAY;
 
   ArrayList<Cell> neighbors;
@@ -317,6 +320,7 @@ class Cell {
     return counter;
   }
 
+  // Draws each cell.
   WorldImage drawCell() {
     if (this.isFlagged) {
       return new OverlayImage(new EquilateralTriangleImage(10.0, OutlineMode.SOLID, Color.PINK),
@@ -331,7 +335,6 @@ class Cell {
     }
     else if (this.hasMine) {
       return new OverlayImage(new TextImage("*", Color.black),
-          // Displays size of neighbhors on each cell
           new OverlayImage(
               new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
               new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Color.RED)));
@@ -344,6 +347,7 @@ class Cell {
     }
   }
 
+  // Opens a non-mine cell and its neighbors if appropriate.
   void floodCells(ArrayList<Cell> acc) {
     for (Cell c : this.neighbors) {
       if (c.countMines() == 0 && !(acc.contains(c))) {
@@ -358,7 +362,8 @@ class Cell {
   }
 }
 
-// Testing the program
+// Testing the program. Program is tested 
+// with a 5x5 with 10 mines game
 class MinesweeperExamples {
   Minesweeper test;
   Cell aMine;
@@ -376,8 +381,10 @@ class MinesweeperExamples {
     this.test = new Minesweeper();
     this.aMine = new Cell();
     this.aMine.hasMine = true;
+    this.aMine.isClicked = true;
     this.aCell1 = new Cell();
     this.aCell2 = new Cell();
+    this.aCell2.isFlagged = true;
     this.aCell3 = new Cell();
     this.initCell = new Cell();
     this.aCell1.neighbors.add(aMine);
@@ -388,7 +395,6 @@ class MinesweeperExamples {
     this.initRow = new ArrayList<Cell>(
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
     this.randTest = new Random(1);
-
     this.initCol = new ArrayList<Cell>(
         Arrays.asList(initCell, initCell, initCell, initCell, initCell));
   }
@@ -399,117 +405,189 @@ class MinesweeperExamples {
     test.bigBang(Minesweeper.WIDTH, Minesweeper.HEIGHT, .003);
   }
 
-  /*
-   * // testing drawing one cell
-   * void testDrawCell(Tester t) {
-   * initData();
-   * t.checkExpect(this.aMine.drawCell(),
-   * new OverlayImage(new TextImage("*", Color.black),
-   * new OverlayImage(
-   * new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE,
-   * Color.black),
-   * new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Color.GREEN))));
-   * t.checkExpect(this.aCell1.drawCell(),
-   * new OverlayImage(
-   * new TextImage(((Integer) this.aCell1.countMines()).toString(), Color.BLACK),
-   * new OverlayImage(
-   * new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE,
-   * Color.black),
-   * new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR))));
-   * }
-   *
-   * // Testing countMines(), which counts the number of mines around one cell.
-   * void testCountMines(Tester t) {
-   * initData();
-   * t.checkExpect(this.aMine.countMines(), 0);
-   * t.checkExpect(this.aCell2.countMines(), 0);
-   * t.checkExpect(this.aCell1.countMines(), 1);
-   * }
-   *
-   * // Testing the method that sets mines on the grid
-   * void testSetMines(Tester t) {
-   * initData();
-   *
-   * this.test.setMines();
-   * ArrayList<Posn> testResult = this.test.mines;
-   * int numMines = this.test.mines.size();
-   *
-   * t.checkExpect(this.test.mines, testResult);
-   * t.checkExpect(numMines, 10);
-   * // Tutor told us that we cannot test because of the randomness
-   * }
-   *
-   * // Testing drawing one row
-   * void testDrawRow(Tester t) {
-   * initData();
-   *
-   * WorldImage result = new EmptyImage();
-   * result = new BesideImage(result, aMine.drawCell());
-   * result = new BesideImage(result, aCell1.drawCell());
-   * result = new BesideImage(result, aCell2.drawCell());
-   * result = new BesideImage(result, aCell3.drawCell());
-   *
-   * t.checkExpect(this.test.drawRow(this.exCells), result);
-   * t.checkExpect(this.test.drawRow(new ArrayList<Cell>()), new EmptyImage());
-   * }
-   *
-   * // Testing drawing multiple rows.
-   * void testDrawMultRows(Tester t) {
-   * initData();
-   *
-   * WorldImage rows = new EmptyImage();
-   * rows = new AboveImage(rows, this.test.drawRow(this.exCells));
-   * rows = new AboveImage(rows, new EmptyImage());
-   *
-   * t.checkExpect(this.test.drawMultRows(
-   * new ArrayList<ArrayList<Cell>>(Arrays.asList(exCells, new
-   * ArrayList<Cell>()))), rows);
-   * }
-   *
-   * // Testing the creation of one row
-   * void testMakeRow(Tester t) {
-   * initData();
-   *
-   * t.checkExpect(this.test.makeRow(), this.initRow);
-   * }
-   *
-   * // Testing creating multiple rows, including setting neighbhors to each cell
-   * void testMakeMultRows(Tester t) {
-   * initData();
-   *
-   * ArrayList<ArrayList<Cell>> testResult = this.test.makeMultRows(this.initCol);
-   *
-   * t.checkExpect(this.test.makeMultRows(initCol), testResult);
-   * // Tutor told us we cannot test sufficiently due to randomness
-   * t.checkExpect(testResult.size() * testResult.get(0).size(), 25);
-   * t.checkExpect(testResult.get(0).get(0).neighbors.size(), 3); // Top left
-   * t.checkExpect(testResult.get(0).get(4).neighbors.size(), 3); // Top right
-   * t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
-   * t.checkExpect(testResult.get(4).get(0).neighbors.size(), 3); // Bottom left
-   * t.checkExpect(testResult.get(4).get(4).neighbors.size(), 3); // Bottom right
-   * t.checkExpect(testResult.get(4).get(2).neighbors.size(), 5); // Bottom middle
-   * t.checkExpect(testResult.get(2).get(0).neighbors.size(), 5); // Middle left
-   * t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
-   * t.checkExpect(testResult.get(2).get(2).neighbors.size(), 8); // Middle
-   * }
-   *
-   * // Testing the creation of one column
-   * void testMakeColumn(Tester t) {
-   * initDa ta();
-   *
-   * t.checkExpect(this.test.makeColumn(), this.initCol);
-   * }
-   *
-   * // Testing the creation of the scene.
-   * void testMakeScene(Tester t) {
-   * initData();
-   *
-   * WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
-   * scene.placeImageXY(this.test.drawMultRows(this.test.makeMultRows(this.test.
-   * makeColumn())), 87,
-   * 87);
-   *
-   * t.checkExpect(this.test.makeScene(), scene);
-   * }
-   */
+  // testing drawing one cell
+  void testDrawCell(Tester t) {
+    initData();
+    // A mine that has been clicked
+    t.checkExpect(this.aMine.drawCell(),
+        new OverlayImage(new TextImage("*", Color.black),
+            new OverlayImage(
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Color.RED))));
+    // A cell that hasn't been clicked.
+    t.checkExpect(this.aCell1.drawCell(),
+        new OverlayImage(
+            new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
+            new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR)));
+
+    // A cell that has been flagged
+    t.checkExpect(this.aCell2.drawCell(),
+        new OverlayImage(new EquilateralTriangleImage(10.0, OutlineMode.SOLID, Color.PINK),
+            new OverlayImage(
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, OutlineMode.OUTLINE, Color.black),
+                new RectangleImage(Cell.CELL_LEN, Cell.CELL_LEN, Cell.FILL, Cell.CCOLOR))));
+
+  }
+
+  // Testing countMines(), which counts the number of mines around one cell.
+  void testCountMines(Tester t) {
+    initData();
+    t.checkExpect(this.aMine.countMines(), 0);
+    t.checkExpect(this.aCell2.countMines(), 0);
+    t.checkExpect(this.aCell1.countMines(), 1);
+  }
+
+  // Testing the method that sets mines on the grid
+  void testSetMines(Tester t) {
+    initData();
+
+    this.test.setMines();
+    ArrayList<Posn> testResult = this.test.mines;
+    int numMines = this.test.mines.size();
+
+    t.checkExpect(this.test.mines, testResult);
+    t.checkExpect(numMines, 10);
+    // Tutor told us that we cannot test because of the randomness
+  }
+
+  // Testing drawing one row
+  void testDrawRow(Tester t) {
+    initData();
+
+    WorldImage result = new EmptyImage();
+    result = new BesideImage(result, aMine.drawCell());
+    result = new BesideImage(result, aCell1.drawCell());
+    result = new BesideImage(result, aCell2.drawCell());
+    result = new BesideImage(result, aCell3.drawCell());
+
+    t.checkExpect(this.test.drawRow(this.exCells), result);
+    t.checkExpect(this.test.drawRow(new ArrayList<Cell>()), new EmptyImage());
+  }
+
+  // Testing drawing multiple rows.
+  void testDrawMultRows(Tester t) {
+    initData();
+
+    WorldImage rows = new EmptyImage();
+    rows = new AboveImage(rows, this.test.drawRow(this.exCells));
+    rows = new AboveImage(rows, new EmptyImage());
+
+    t.checkExpect(this.test.drawMultRows(
+        new ArrayList<ArrayList<Cell>>(Arrays.asList(exCells, new ArrayList<Cell>()))), rows);
+  }
+
+  // Testing the creation of one row
+  void testMakeRow(Tester t) {
+    initData();
+    t.checkExpect(this.test.makeRow(), this.initRow);
+  }
+
+  // Testing creating multiple rows, including setting neighbors to each cell
+  void testMakeMultRows(Tester t) {
+    initData();
+
+    ArrayList<ArrayList<Cell>> testResult = this.test.makeMultRows(this.initCol);
+
+    t.checkExpect(this.test.makeMultRows(initCol), testResult);
+    // Tutor told us we cannot test sufficiently due to randomness
+    t.checkExpect(testResult.get(0).size(), 5);
+    t.checkExpect(testResult.get(0).get(0).neighbors.size(), 3); // Top left
+    t.checkExpect(testResult.get(0).get(4).neighbors.size(), 3); // Top right
+    t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
+    t.checkExpect(testResult.get(4).get(0).neighbors.size(), 3); // Bottom left
+    t.checkExpect(testResult.get(4).get(4).neighbors.size(), 3); // Bottom right
+    t.checkExpect(testResult.get(4).get(2).neighbors.size(), 5); // Bottom middle
+    t.checkExpect(testResult.get(2).get(0).neighbors.size(), 5); // Middle left
+    t.checkExpect(testResult.get(0).get(2).neighbors.size(), 5); // Middle right
+    t.checkExpect(testResult.get(2).get(2).neighbors.size(), 8); // Middle
+  }
+
+  // Testing the creation of one column
+  void testMakeColumn(Tester t) {
+    initData();
+    t.checkExpect(this.test.makeColumn(), this.initCol);
+  }
+
+  // Testing the creation of the scene.
+  void testMakeScene(Tester t) {
+    initData();
+
+    WorldScene scene = new WorldScene(Minesweeper.WIDTH, Minesweeper.HEIGHT);
+    scene.placeImageXY(this.test.drawMultRows(this.test.makeMultRows(this.test.makeColumn())), 87,
+        87);
+
+    t.checkExpect(this.test.makeScene(), scene);
+  }
+
+  // Testing onMouseClicked()
+  void testOnMouseClick(Tester t) {
+    initData();
+    t.checkExpect(this.test.board.get(0).get(0).isClicked, false);
+    this.test.onMouseClicked(new Posn(0, 0), "LeftButton");
+    t.checkExpect(this.test.board.get(0).get(0).isClicked, true);
+    t.checkExpect(this.test.board.get(1).get(0).isFlagged, false);
+    this.test.onMouseClicked(new Posn(5, 36), "RightButton");
+    t.checkExpect(this.test.board.get(1).get(0).isFlagged, true);
+
+  }
+
+  // Testing worldEnds()
+  void testingWorldEnds(Tester t) {
+    initData();
+    t.checkExpect(this.test.worldEnds(), new WorldEnd(false, this.test.makeScene()));
+    this.test.board.get(0).get(4).hasMine = true;
+    t.checkExpect(this.test.board.get(0).get(4).hasMine, true);
+    this.test.onMouseClicked(new Posn(35 * 4 + 1, 5), "LeftButton");
+    t.checkExpect(this.test.hitMine(), true);
+    t.checkExpect(this.test.worldEnds(),
+        new WorldEnd(true, this.test.makeFinalScene("Game over: LOSER!")));
+  }
+
+  // Testing hitMine()
+  void testingHitMine(Tester t) {
+    initData();
+    t.checkExpect(this.test.hitMine(), false);
+    this.test.board.get(0).get(0).hasMine = false;
+    t.checkExpect(this.test.board.get(0).get(0).hasMine, false);
+    this.test.board.get(0).get(4).hasMine = true;
+    t.checkExpect(this.test.board.get(0).get(4).hasMine, true);
+    this.test.onMouseClicked(new Posn(35 * 4 + 1, 5), "LeftButton");
+    t.checkExpect(this.test.hitMine(), true);
+  }
+
+  // Testing allCellsFound()
+  void testAllCellsFound(Tester t) {
+    initData();
+    t.checkExpect(this.test.allCellsFound(), false);
+    for (int i = 0; i < this.test.board.size(); i++) {
+      for (int j = 0; j < this.test.board.get(i).size(); j++) {
+        if (!this.test.board.get(i).get(j).hasMine) {
+          this.test.board.get(i).get(j).isClicked = true;
+        }
+      }
+    }
+    t.checkExpect(this.test.allCellsFound(), true);
+  }
+
+  // Testing makeFinalScene()
+  void testMakeFinalScene(Tester t) {
+    // Not sure how to test here.
+  }
+
+  // Testing revealMine().
+  void testRevealMine(Tester t) {
+    initData();
+    // Cell forced to have a mine.
+    this.test.board.get(0).get(0).hasMine = true;
+    // Cell forced to be unclicked initially.
+    this.test.board.get(0).get(0).isClicked = false;
+    // Checking above actions.
+    t.checkExpect(this.test.board.get(0).get(0).hasMine, true);
+    t.checkExpect(this.test.board.get(0).get(0).isClicked, false);
+    // Calling revealMines()
+    this.test.revealMines();
+    // Testing if revealMines() changed the cell which was previously
+    // unclicked to now being clicked.
+    t.checkExpect(this.test.board.get(0).get(0).isClicked, true);
+  }
 }
